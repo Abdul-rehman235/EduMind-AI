@@ -45,16 +45,17 @@ body {
     margin-bottom: 24px;
 }
 
-.brand-logo {
+.auth-logo {
     background: var(--primary);
     color: white;
-    width: 38px;
-    height: 38px;
-    border-radius: 8px;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 18px;
+    margin: 0 auto 12px auto;
 }
 
 .auth-header h2 {
