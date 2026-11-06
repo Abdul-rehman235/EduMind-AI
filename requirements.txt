@@ -1,0 +1,7 @@
+Flask
+python-dotenv
+pypdf
+faiss-cpu
+langchain-core
+langchain-community
+langchain-groq

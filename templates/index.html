@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduMind AI - Student Academic Workspace</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/style.css?v=subject-rag-1">
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <header class="app-header">
+        <div class="brand-section">
+            <div class="brand-logo">
+                <i class="fa-solid fa-book-open"></i>
+            </div>
+            <div>
+                <h1>EduMind AI <span class="badge-tag">Academic Edition</span></h1>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <div class="network-badge online">
+                <span class="pulse-dot"></span>
+            </div>
+<div class="user-profile">
+            <button class="profile-btn" id="profileBtn" type="button">
+                <i class="fa-solid fa-circle-user"></i>
+                <span>{{ username }}</span>
+            </button>
+        
+            <div class="profile-popup" id="profilePopup">
+                <p><strong>Username:</strong> {{ username }}</p>
+                <p><strong>Email:</strong> {{ email }}</p>
+            </div>
+        </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Dashboard -->
+    <div class="app-workspace">
+
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar">
+            <div class="sidebar-tabs">
+                <button onclick="switchTab('books')" id="tab-btn-books" class="tab-btn active">
+                    <i class="fa-solid fa-layer-group"></i> Library
+                </button>
+                <button onclick="switchTab('friends')" id="tab-btn-friends" class="tab-btn">
+                    <i class="fa-solid fa-bookmark"></i> Importants
+                </button>
+            </div>
+
+            <!-- Library View -->
+            <div id="panel-books" class="sidebar-content">
+                <div class="section-title">Pre-Loaded Textbooks</div>
+                <div class="nav-list">
+                    <button onclick="switchSubject('physics', 'Physics', 'Chapter 1: Simple Harmonic Motion')" class="nav-item active subject-btn">
+                        <i class="fa-solid fa-atom"></i>
+                        <span>Physics (Class 10)</span>
+                        <span class="item-badge">Cached</span>
+                    </button>
+                    <button onclick="switchSubject('computer_science', 'Computer Science', 'Chapter 1: Introduction to Programming')" class="nav-item subject-btn">
+                        <i class="fa-solid fa-laptop-code"></i>
+                        <span>Computer Science</span>
+                        <span class="item-badge">Cached</span>
+                    </button>
+                    <button onclick="switchSubject('chemistry', 'Chemistry', 'Chapter 1: Chemical Equilibrium')" class="nav-item subject-btn">
+                        <i class="fa-solid fa-flask"></i>
+                        <span>Chemistry</span>
+                        <span class="item-badge">Cached</span>
+                    </button>
+                    <button onclick="switchSubject('mathematics', 'Mathematics', 'Chapter 1: Quadratic Equations')" class="nav-item subject-btn">
+                        <i class="fa-solid fa-square-root-variable"></i>
+                        <span>Mathematics</span>
+                        <span class="item-badge">Cached</span>
+                    </button>
+                </div>
+
+                <div class="section-title" style="margin-top: 24px;">Active Chapter Index</div>
+                <div class="chapter-card">
+                    <h4 id="chap-1-title">Chapter 1: Simple Harmonic Motion</h4>
+                    <p>Pages 1 to 24 • Sindh Curriculum Board</p>
+                </div>
+            </div>
+
+            <!-- Importants View -->
+            <div id="panel-friends" class="sidebar-content" style="display: none;">
+                <div class="section-title">
+                    <span>Important Answers</span>
+                    <span class="item-badge" id="important-count">0</span>
+                </div>
+                <div class="nav-list" id="important-list-container">
+                    <p class="empty-importants" id="important-empty">No important answers yet. Click the Important button under an assistant response to save it here.</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center Reader / Content Panel -->
+        <main class="content-panel">
+            <div class="panel-topbar">
+                <span id="current-book-display">Physics Grade 10 — Chapter 1 (Page 12)</span>
+                <div class="pagination-controls">
+                    <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span>Page 12 of 150</span>
+                    <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <div class="reader-container pdf-reader-container">
+                <iframe
+                    id="subject-pdf-viewer"
+                    class="subject-pdf-viewer"
+                    src="/subject-pdf/physics#toolbar=1&navpanes=1&view=FitH"
+                    title="Physics textbook PDF"
+                    loading="lazy">
+                </iframe>
+                <div id="pdf-load-error" class="pdf-load-error" hidden>
+                    <i class="fa-solid fa-file-circle-exclamation"></i>
+                    <h3>PDF could not be displayed</h3>
+                    <p>Check that this subject's PDF path is configured correctly in your .env file.</p>
+                </div>
+            </div>
+            <section id="important-detail-view" class="important-detail-view" hidden>
+                <div class="important-detail-toolbar">
+                    <button type="button" class="detail-back-btn" onclick="closeImportantDetail()">
+                        <i class="fa-solid fa-arrow-left"></i> Back to textbook
+                    </button>
+                    <span id="important-detail-subject" class="detail-subject-label"></span>
+                </div>
+                <article class="important-detail-card">
+                    <div class="important-detail-heading">
+                        <i class="fa-solid fa-bookmark"></i>
+                        <h2>Important Answer</h2>
+                    </div>
+                    <div id="important-detail-content" class="important-detail-content"></div>
+                </article>
+            </section>
+        </main>
+
+        <!-- Drag handle: resize the assistant panel on desktop -->
+        <div class="panel-resizer" id="panel-resizer" role="separator" aria-orientation="vertical" aria-label="Resize chat panel" tabindex="0"></div>
+
+        <!-- Right Academic Assistant & Query Panel -->
+        <section class="assistant-panel" id="assistant-panel">
+            <div class="assistant-header">
+                <div class="header-title">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <h3 id="active-chat-title">Subject Resource Assistant</h3>
+                </div>
+                <span class="context-pill">Page 12 Active</span>
+            </div>
+            
+            <div class="chat-stream" id="chat-messages" aria-live="polite"></div>
+            <form method="post" id="chat-form" class="assistant-input-box" autocomplete="off">
+                <div class="input-wrapper">
+                    <input type="text" name="query" id="user-input" placeholder="Ask this subject's textbook..." autocomplete="off">
+                    <button class="send-btn" id="send-btn" type="submit" aria-label="Send message">
+                        <i class="fa-solid fa-arrow-up"></i>
+                    </button>
+                </div>
+                <div class="chat-status" id="chat-status">Answers are grounded only in the selected subject PDF.</div>
+            </form>
+        </section>
+
+    </div>
+    <!-- Frontend Controller Script -->
+    <script>
+        const SUBJECTS = {
+            physics: { name: 'Physics', chapter: 'Chapter 1: Simple Harmonic Motion' },
+            computer_science: { name: 'Computer Science', chapter: 'Chapter 1: Introduction to Programming' },
+            chemistry: { name: 'Chemistry', chapter: 'Chapter 1: Chemical Equilibrium' },
+            mathematics: { name: 'Mathematics', chapter: 'Chapter 1: Quadratic Equations' }
+        };
+        let activeSubject = 'physics';
+        let importantAnswers = [];
+        let sending = false;
+
+        const chatContainer = () => document.getElementById('chat-messages');
+        const storageKey = subject => `documind_chat_${subject}`;
+
+        const importantStorageKey = 'documind_important_answers';
+
+        function loadImportantAnswers() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(importantStorageKey) || '[]');
+                importantAnswers = Array.isArray(saved) ? saved : [];
+            } catch (_) {
+                importantAnswers = [];
+            }
+            renderImportantAnswers();
+        }
+
+        function saveImportantAnswers() {
+            try {
+                localStorage.setItem(importantStorageKey, JSON.stringify(importantAnswers));
+            } catch (e) {
+                console.warn('Important answers could not be saved', e);
+            }
+            renderImportantAnswers();
+        }
+
+        function isImportant(text) {
+            return importantAnswers.some(item => item.text === text && item.subject === activeSubject);
+        }
+
+        function updateImportantButton(button, text) {
+            const saved = isImportant(text);
+            button.classList.toggle('is-saved', saved);
+            button.innerHTML = saved
+                ? '<i class="fa-solid fa-bookmark"></i> Saved'
+                : '<i class="fa-regular fa-bookmark"></i> Important';
+            button.setAttribute('aria-pressed', String(saved));
+        }
+
+        function toggleImportant(text, button) {
+            const index = importantAnswers.findIndex(
+                item => item.text === text && item.subject === activeSubject
+            );
+
+            if (index >= 0) {
+                importantAnswers.splice(index, 1);
+            } else {
+                importantAnswers.unshift({
+                    id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+                    subject: activeSubject,
+                    subjectName: SUBJECTS[activeSubject].name,
+                    text
+                });
+            }
+
+            saveImportantAnswers();
+            updateImportantButton(button, text);
+        }
+
+        function showImportantAnswer(item) {
+            const pdfReader = document.querySelector('.pdf-reader-container');
+            const detailView = document.getElementById('important-detail-view');
+            const detailContent = document.getElementById('important-detail-content');
+            const detailSubject = document.getElementById('important-detail-subject');
+            if (!pdfReader || !detailView || !detailContent) return;
+            pdfReader.hidden = true;
+            detailView.hidden = false;
+            detailContent.textContent = item.text || '';
+            detailSubject.textContent = item.subjectName || item.subject || '';
+            document.getElementById('current-book-display').textContent =
+                `${item.subjectName || item.subject || 'Subject'} — Important Answer`;
+            if (window.matchMedia('(max-width: 760px)').matches) {
+                document.querySelector('.content-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function closeImportantDetail() {
+            const pdfReader = document.querySelector('.pdf-reader-container');
+            const detailView = document.getElementById('important-detail-view');
+            if (pdfReader) pdfReader.hidden = false;
+            if (detailView) detailView.hidden = true;
+            document.getElementById('current-book-display').textContent =
+                `${SUBJECTS[activeSubject].name} Grade 10 — Chapter 1`;
+        }
+
+        function renderImportantAnswers() {
+            const container = document.getElementById('important-list-container');
+            const count = document.getElementById('important-count');
+            if (!container || !count) return;
+            container.replaceChildren();
+            count.textContent = importantAnswers.length;
+
+            if (importantAnswers.length === 0) {
+                const message = document.createElement('p');
+                message.className = 'empty-importants';
+                message.textContent = 'No important answers yet. Save an assistant response to keep it here.';
+                container.appendChild(message);
+                return;
+            }
+
+            importantAnswers.forEach(item => {
+                const card = document.createElement('article');
+                card.className = 'important-card';
+                const heading = document.createElement('div');
+                heading.className = 'important-card-heading';
+
+                const subject = document.createElement('strong');
+                subject.textContent = item.subjectName || item.subject;
+
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.className = 'icon-btn important-remove';
+                remove.title = 'Remove from Importants';
+                remove.setAttribute('aria-label', 'Remove important answer');
+                remove.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                remove.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    importantAnswers = importantAnswers.filter(saved => saved.id !== item.id);
+                    saveImportantAnswers();
+                    document.querySelectorAll('.important-btn').forEach(btn => {
+                        const responseText = btn.closest('.message-row')?.querySelector('.msg-bubble p')?.textContent || '';
+                        updateImportantButton(btn, responseText);
+                    });
+                    const detail = document.getElementById('important-detail-view');
+                    if (detail && !detail.hidden && document.getElementById('important-detail-content').textContent === item.text) {
+                        closeImportantDetail();
+                    }
+                });
+                heading.append(subject, remove);
+
+                const open = document.createElement('button');
+                open.type = 'button';
+                open.className = 'important-open-btn';
+                open.setAttribute('aria-label', `Open full important answer for ${item.subjectName || item.subject}`);
+                const preview = document.createElement('span');
+                preview.className = 'important-preview';
+                preview.textContent = item.text;
+                const hint = document.createElement('span');
+                hint.className = 'important-open-hint';
+                hint.innerHTML = '<i class="fa-solid fa-up-right-from-square"></i> Open full answer';
+                open.append(preview, hint);
+                open.addEventListener('click', () => showImportantAnswer(item));
+                card.append(heading, open);
+                container.appendChild(card);
+            });
+        }
+        function addMessage(role, text, save=true) {
+            const row = document.createElement('div');
+            row.className = `message-row ${role}`;
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble';
+            const paragraph = document.createElement('p');
+            paragraph.textContent = text;
+            bubble.appendChild(paragraph);
+            row.appendChild(bubble);
+
+            // Assistant responses can be saved to Importants.
+            if (role === 'system') {
+                const actions = document.createElement('div');
+                actions.className = 'inline-actions';
+                const importantBtn = document.createElement('button');
+                importantBtn.type = 'button';
+                importantBtn.className = 'mini-btn important-btn';
+                importantBtn.title = 'Save this response to Importants';
+                importantBtn.innerHTML = '<i class="fa-regular fa-bookmark"></i> Important';
+                importantBtn.addEventListener('click', () => toggleImportant(text, importantBtn));
+                actions.appendChild(importantBtn);
+                row.appendChild(actions);
+                updateImportantButton(importantBtn, text);
+            }
+
+            chatContainer().appendChild(row);
+            chatContainer().scrollTop = chatContainer().scrollHeight;
+            if (save) saveCurrentChat();
+            return row;
+        }
+
+        function saveCurrentChat() {
+            const messages = [...chatContainer().querySelectorAll('.message-row')].map(row => ({
+                role: row.classList.contains('user') ? 'user' : 'system',
+                text: row.querySelector('.msg-bubble')?.innerText || ''
+            }));
+            try { localStorage.setItem(storageKey(activeSubject), JSON.stringify(messages)); } catch (e) { console.warn('Chat history could not be saved', e); }
+        }
+
+        function loadSubjectChat() {
+            const container = chatContainer();
+            container.replaceChildren();
+            let messages = [];
+            try { messages = JSON.parse(localStorage.getItem(storageKey(activeSubject)) || '[]'); } catch (_) {}
+            if (!Array.isArray(messages) || messages.length === 0) {
+                addMessage('system', `Welcome to ${SUBJECTS[activeSubject].name} assistant. This chat uses only the ${SUBJECTS[activeSubject].name} PDF.`, false);
+            } else {
+                messages.forEach(item => addMessage(item.role === 'user' ? 'user' : 'system', String(item.text || ''), false));
+            }
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function switchTab(tab) {
+            const books = tab === 'books';
+            document.getElementById('panel-books').style.display = books ? 'block' : 'none';
+            document.getElementById('panel-friends').style.display = books ? 'none' : 'block';
+            document.getElementById('tab-btn-books').classList.toggle('active', books);
+            document.getElementById('tab-btn-friends').classList.toggle('active', !books);
+        }
+
+        const profileBtn = document.getElementById("profileBtn");
+        const profilePopup = document.getElementById("profilePopup");
+        
+        profileBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            profilePopup.classList.toggle("show");
+        });
+        
+        document.addEventListener("click", function (e) {
+            if (!e.target.closest(".user-profile")) {
+                profilePopup.classList.remove("show");
+            }
+        });
+
+        function switchSubject(key, subject, chapter) {
+            if (!SUBJECTS[key]) return;
+            closeImportantDetail();
+            activeSubject = key;
+            document.querySelectorAll('.subject-btn').forEach(button => button.classList.remove('active'));
+            const selected = document.querySelector(`.subject-btn[onclick*="${key}"]`);
+            if (selected) selected.classList.add('active');
+            document.getElementById('current-book-display').innerText = `${subject} — ${chapter}`;
+            document.getElementById('chap-1-title').innerText = chapter;
+            document.getElementById('active-chat-title').innerText = `${subject} Resource Desk`;
+            const pdfViewer = document.getElementById('subject-pdf-viewer');
+            const pdfError = document.getElementById('pdf-load-error');
+            pdfError.hidden = true;
+            pdfViewer.hidden = false;
+            pdfViewer.title = `${subject} textbook PDF`;
+            pdfViewer.src = `/subject-pdf/${encodeURIComponent(key)}#toolbar=1&navpanes=1&view=FitH`;
+            pdfViewer.onerror = () => { pdfViewer.hidden = true; pdfError.hidden = false; };
+            document.getElementById('user-input').placeholder = `Ask ${subject} textbook...`;
+            loadSubjectChat();
+        }
+
+        document.getElementById('chat-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const input = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-btn');
+            const status = document.getElementById('chat-status');
+            const message = input.value.trim();
+            if (!message || sending) return;
+
+            addMessage('user', message);
+            input.value = '';
+            sending = true;
+            sendButton.disabled = true;
+            status.textContent = `Searching only the ${SUBJECTS[activeSubject].name} textbook...`;
+            const loading = addMessage('system', 'Searching textbook and preparing an answer...', false);
+
+            try {
+                const body = new URLSearchParams({ query: message, subject: activeSubject });
+                const response = await fetch('/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body,
+                    credentials: 'same-origin'
+                });
+                const data = await response.json().catch(() => ({}));
+                loading.remove();
+                if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+                addMessage('system', data.response || 'No answer was returned.');
+                status.textContent = `${SUBJECTS[activeSubject].name} source only`;
+            } catch (error) {
+                loading.remove();
+                addMessage('system', `Error: ${error.message}`);
+                status.textContent = 'Please check the server log if this continues.';
+            } finally {
+                sending = false;
+                sendButton.disabled = false;
+                input.focus();
+            }
+        });
+
+        // Desktop drag-to-resize for the assistant column.
+        (() => {
+            const handle = document.getElementById('panel-resizer');
+            const workspace = document.querySelector('.app-workspace');
+            const panel = document.getElementById('assistant-panel');
+            if (!handle || !workspace || !panel) return;
+            let dragging = false;
+            const resize = clientX => {
+                const rect = workspace.getBoundingClientRect();
+                const width = Math.max(300, Math.min(620, rect.right - clientX));
+                document.documentElement.style.setProperty('--assistant-width', `${width}px`);
+            };
+            handle.addEventListener('pointerdown', event => {
+                if (window.matchMedia('(max-width: 760px)').matches) return;
+                dragging = true; handle.setPointerCapture(event.pointerId);
+                document.body.classList.add('resizing-panels');
+                resize(event.clientX);
+            });
+            handle.addEventListener('pointermove', event => { if (dragging) resize(event.clientX); });
+            const stop = () => { dragging = false; document.body.classList.remove('resizing-panels'); };
+            handle.addEventListener('pointerup', stop);
+            handle.addEventListener('pointercancel', stop);
+            handle.addEventListener('keydown', event => {
+                if (event.key === 'ArrowLeft') { event.preventDefault(); resize(workspace.getBoundingClientRect().right - panel.offsetWidth - 20); }
+                if (event.key === 'ArrowRight') { event.preventDefault(); resize(workspace.getBoundingClientRect().right - panel.offsetWidth + 20); }
+            });
+        })();
+
+        loadImportantAnswers();
+        loadSubjectChat();
+    </script>
+</body>
+</html>
